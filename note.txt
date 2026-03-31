@@ -1,0 +1,9 @@
+please summary issue
+
+Issue summary:
+
+The remote URL was correct, but push failed with 403 because GitHub authenticated you as Witaya252525, which did not have write access to Engwitaya01/Bar2Bar.
+The error remote origin already exists was not the main problem; it only meant origin was already configured.
+Root cause was cached Windows GitHub credentials pointing to the wrong account.
+Fix was to remove the cached GitHub credential and push again, which re-authenticated correctly.
+Final status: push to https://github.com/Engwitaya01/Bar2Bar.git works, and main now tracks origin/main.
