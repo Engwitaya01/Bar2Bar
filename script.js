@@ -18,6 +18,7 @@
 
   const DEFAULT_INCOME = 10;
   const DEFAULT_EXPENSE = 15;
+  const USERNAME_PATTERN = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{5,}$/;
 
   // ── Build the input rows ──────────────────────────────────────────────────
   function buildRows() {
@@ -60,37 +61,49 @@
 
   // ── Username validation ─────────────────────────────────────────────────
   function attachUsernameValidation() {
+    const form = document.getElementById("usernameForm");
     const input = document.getElementById("usernameInput");
     const feedback = document.getElementById("usernameFeedback");
-    const btn = document.getElementById("submitUsername");
+    const success = document.getElementById("usernameSuccess");
 
-    btn.addEventListener("click", () => {
-      const val = input.value;
-      let error = "";
+    const setValidationState = ({ isValid, message }) => {
+      input.classList.toggle("is-valid", isValid);
+      input.classList.toggle("is-invalid", !isValid);
+      feedback.textContent = isValid ? "" : message;
+      success.textContent = isValid ? message : "";
+    };
 
-      if (val.length < 5) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const value = input.value.trim();
+
+      if (USERNAME_PATTERN.test(value)) {
+        setValidationState({
+          isValid: true,
+          message: "Username is valid and matches the required pattern.",
+        });
+        return;
+      }
+
+      let error =
+        "Username must be at least 5 characters long and include 1 uppercase letter and 1 special character.";
+
+      if (value.length < 5) {
         error = "Username must be at least 5 characters long.";
-      } else if (!/[A-Z]/.test(val)) {
+      } else if (!/[A-Z]/.test(value)) {
         error = "Username must contain at least 1 uppercase letter.";
-      } else if (!/[^A-Za-z0-9]/.test(val)) {
+      } else if (!/[^A-Za-z0-9]/.test(value)) {
         error = "Username must contain at least 1 special character.";
       }
 
-      if (error) {
-        input.classList.add("is-invalid");
-        input.classList.remove("is-valid");
-        feedback.textContent = error;
-      } else {
-        input.classList.remove("is-invalid");
-        input.classList.add("is-valid");
-        feedback.textContent = "";
-      }
+      setValidationState({ isValid: false, message: error });
     });
 
-    // Clear validation state on input
     input.addEventListener("input", () => {
       input.classList.remove("is-invalid", "is-valid");
       feedback.textContent = "";
+      success.textContent = "";
     });
   }
 
