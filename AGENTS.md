@@ -1,51 +1,67 @@
-# Bar2Bar – Project Guidelines
+# Bar2Bar Agent Guide
 
-## Project Overview
+## Project Purpose
 
-Bar2Bar (displayed as **Bucks2Bar**) is a single-page, client-side web app for tracking monthly income and expenses. There is no backend, no build step, and no package manager.
+Bar2Bar, labeled **Bucks2Bar** in the UI, is a static single-page finance tracker for entering monthly income and expenses, validating a username, viewing those values in a bar chart, and downloading the chart as an image. The project is intentionally small and browser-only.
 
-## Stack
+## What Exists Today
 
-| Layer   | Technology                                                  |
-| ------- | ----------------------------------------------------------- |
-| Markup  | Vanilla HTML5 (`home.html`)                                 |
-| Logic   | Vanilla JavaScript ES6+ (`script.js`, IIFE, `"use strict"`) |
-| Styling | Bootstrap 5.3 (CDN) + inline `<style>` in `home.html`       |
-| Charts  | Chart.js 4.4 (CDN)                                          |
+- A username form at the top of the page with client-side validation feedback.
+- A data tab containing 12 generated month rows for income and expense entry.
+- A chart tab that renders a grouped income-versus-expense bar chart.
+- A download button that exports the rendered chart to PNG.
+- A Jest test file focused on `validateUsername` behavior.
 
-## Architecture
+## Source of Truth by File
 
-- All app logic lives in `script.js` wrapped in a single IIFE.
-- The DOM is populated dynamically: `buildRows()` injects 12 month rows into `#inputBody` at page load.
-- Chart state is held in the module-level `chart` variable; `ensureChart()` creates or refreshes it lazily when the Chart tab is shown.
-- There is no routing, no state management library, and no module bundler.
+- `home.html`: all markup, Bootstrap CDN imports, Chart.js CDN import, and the inline CSS theme.
+- `script.js`: all runtime behavior, DOM wiring, validation, chart creation, chart download, and the test-exported `validateUsername` helper.
+- `script.test.js`: expected username validation behavior and exact user-facing messages.
+- `jest.config.js`: current Jest environment configuration.
+- `README.md`: currently minimal and not a reliable source of implementation detail.
 
-## Code Conventions
+## Architecture Requirements
 
-- Keep all JavaScript inside the existing IIFE in `script.js`; do not introduce ES modules or `import/export`.
-- Use `const`/`let`, arrow functions, and template literals — no `var`.
-- Input IDs follow the pattern `income-{0-11}` and `expense-{0-11}` (zero-indexed by month).
-- Monetary values are always clamped to `>= 0` and formatted with two decimal places (`toFixed(2)`).
-- Validation resets negative inputs to `0` and applies the Bootstrap `is-invalid` class.
-- Do not add external libraries, npm packages, or a build system.
+- Keep application logic in the single existing IIFE inside `script.js`.
+- Avoid architectural upgrades unless explicitly requested: no framework conversion, no modules, no bundler, no backend.
+- The app must still work by opening `home.html` directly in a browser.
+- Dependencies must remain CDN-based in the page and minimal in development tooling.
 
-## Styling
+## Behavioral Requirements
 
-- Use Bootstrap 5 utility classes first; only add custom CSS in the `<style>` block of `home.html` when Bootstrap cannot cover the need.
-- Brand colors: primary blue `#1a73e8`, dark blue `#0d47a1`, header gradient `135deg, #1a73e8 → #0d47a1`.
-- Cards use `border-radius: 12px` and `box-shadow: 0 2px 12px rgba(0,0,0,0.09)`.
-- UI elements all button must be a pink shade of `#e91e63` with white text, and use the `btn` and `btn-primary` classes.
+- `buildRows()` must populate all 12 months on page load.
+- Income and expense inputs must remain editable numeric fields with IDs `income-{index}` and `expense-{index}`.
+- Negative entries must be corrected to `0` and marked invalid.
+- `readValues()` must continue clamping DOM values to non-negative numbers.
+- The chart should be created lazily and refreshed when the user revisits the Chart tab.
+- The PNG download flow must continue to work without a server.
 
-## File Structure
+## Username Validation Requirements
 
-```
-home.html   – Single HTML page (markup + styles)
-script.js   – All app logic (IIFE)
-README.md   – Project description
-```
+- Validation is based on the trimmed username value.
+- A valid username must have at least 5 characters, at least 1 uppercase letter, and at least 1 special character.
+- The helper `validateUsername` is the behavioral contract for both tests and UI feedback.
+- When both uppercase and special-character rules fail, the returned message must be the combined general error.
+- Exact messages matter because tests assert on them.
 
-## Key Constraints
+## Test Guidance
 
-- No backend, no server required — open `home.html` directly in a browser.
-- CDN-only dependencies; do not download or vendor libraries.
-- All data is ephemeral (in-memory only); there is intentionally no persistence layer.
+- `script.js` must be safe to require in Node-based Jest runs.
+- Keep browser bootstrap logic guarded behind a `document` existence check.
+- Keep `module.exports = { validateUsername }` available unless tests are intentionally redesigned.
+- After changing username validation, run `script.test.js`.
+- Prefer extracting pure helpers for future logic that needs unit tests.
+
+## UI and Style Constraints
+
+- Preserve Bootstrap 5 usage and the current visual direction.
+- Header styling should stay blue-gradient based.
+- Cards should stay rounded with a light shadow.
+- Primary actions must remain pink `btn btn-primary` buttons with white text.
+- Use Bootstrap utilities first and keep custom CSS in the `home.html` `<style>` block.
+
+## Change Strategy
+
+- Make focused edits and preserve existing IDs, selectors, and user flows.
+- Do not add persistence, authentication, APIs, or server assumptions unless explicitly requested.
+- Update tests when behavior intentionally changes; otherwise treat existing tests as part of the spec.

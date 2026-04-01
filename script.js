@@ -1,3 +1,34 @@
+const USERNAME_PATTERN_EXPORT = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{5,}$/;
+
+function validateUsername(rawValue) {
+  const value = (rawValue || "").trim();
+
+  if (USERNAME_PATTERN_EXPORT.test(value)) {
+    return {
+      isValid: true,
+      message: "Username is valid and matches the required pattern.",
+    };
+  }
+
+  let message =
+    "Username must be at least 5 characters long and include 1 uppercase letter and 1 special character.";
+  const hasUppercase = /[A-Z]/.test(value);
+  const hasSpecialCharacter = /[^A-Za-z0-9]/.test(value);
+
+  if (value.length < 5) {
+    message = "Username must be at least 5 characters long.";
+  } else if (!hasUppercase && !hasSpecialCharacter) {
+    message =
+      "Username must be at least 5 characters long and include 1 uppercase letter and 1 special character.";
+  } else if (!hasUppercase) {
+    message = "Username must contain at least 1 uppercase letter.";
+  } else if (!hasSpecialCharacter) {
+    message = "Username must contain at least 1 special character.";
+  }
+
+  return { isValid: false, message };
+}
+
 (() => {
   "use strict";
 
@@ -18,7 +49,6 @@
 
   const DEFAULT_INCOME = 10;
   const DEFAULT_EXPENSE = 15;
-  const USERNAME_PATTERN = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{5,}$/;
 
   // ── Build the input rows ──────────────────────────────────────────────────
   function buildRows() {
@@ -75,29 +105,7 @@
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-
-      const value = input.value.trim();
-
-      if (USERNAME_PATTERN.test(value)) {
-        setValidationState({
-          isValid: true,
-          message: "Username is valid and matches the required pattern.",
-        });
-        return;
-      }
-
-      let error =
-        "Username must be at least 5 characters long and include 1 uppercase letter and 1 special character.";
-
-      if (value.length < 5) {
-        error = "Username must be at least 5 characters long.";
-      } else if (!/[A-Z]/.test(value)) {
-        error = "Username must contain at least 1 uppercase letter.";
-      } else if (!/[^A-Za-z0-9]/.test(value)) {
-        error = "Username must contain at least 1 special character.";
-      }
-
-      setValidationState({ isValid: false, message: error });
+      setValidationState(validateUsername(input.value));
     });
 
     input.addEventListener("input", () => {
@@ -269,11 +277,17 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    buildRows();
-    attachUsernameValidation();
-    attachValidation();
-    attachDownloadButton();
-    attachTabListener(); // chart is built lazily on first tab click
-  });
+  if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", () => {
+      buildRows();
+      attachUsernameValidation();
+      attachValidation();
+      attachDownloadButton();
+      attachTabListener(); // chart is built lazily on first tab click
+    });
+  }
 })();
+
+if (typeof module !== "undefined") {
+  module.exports = { validateUsername };
+}
