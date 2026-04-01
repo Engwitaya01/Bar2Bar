@@ -62,6 +62,21 @@
             position: relative;
             height: 420px;
         }
+
+        .btn-primary {
+            background-color: #e91e63;
+            border-color: #e91e63;
+            color: #fff;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary:focus-visible {
+            background-color: #c2185b;
+            border-color: #c2185b;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -73,6 +88,24 @@
     </div>
 
     <div class="container pb-5">
+
+        <!-- Username Section -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <div>
+                        <label for="usernameInput" class="form-label fw-semibold">Username</label>
+                        <input type="text" id="usernameInput" class="form-control" placeholder="Enter username"
+                            aria-describedby="usernameHelp usernameFeedback" />
+                        <div id="usernameHelp" class="form-text">
+                            At least 5 characters, 1 uppercase letter, and 1 special character.
+                        </div>
+                        <div id="usernameFeedback" class="invalid-feedback"></div>
+                        <button id="submitUsername" class="btn btn-primary mt-2" type="button">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Tabs -->
         <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">

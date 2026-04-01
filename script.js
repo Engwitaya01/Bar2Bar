@@ -58,6 +58,42 @@
     });
   }
 
+  // ── Username validation ─────────────────────────────────────────────────
+  function attachUsernameValidation() {
+    const input = document.getElementById("usernameInput");
+    const feedback = document.getElementById("usernameFeedback");
+    const btn = document.getElementById("submitUsername");
+
+    btn.addEventListener("click", () => {
+      const val = input.value;
+      let error = "";
+
+      if (val.length < 5) {
+        error = "Username must be at least 5 characters long.";
+      } else if (!/[A-Z]/.test(val)) {
+        error = "Username must contain at least 1 uppercase letter.";
+      } else if (!/[^A-Za-z0-9]/.test(val)) {
+        error = "Username must contain at least 1 special character.";
+      }
+
+      if (error) {
+        input.classList.add("is-invalid");
+        input.classList.remove("is-valid");
+        feedback.textContent = error;
+      } else {
+        input.classList.remove("is-invalid");
+        input.classList.add("is-valid");
+        feedback.textContent = "";
+      }
+    });
+
+    // Clear validation state on input
+    input.addEventListener("input", () => {
+      input.classList.remove("is-invalid", "is-valid");
+      feedback.textContent = "";
+    });
+  }
+
   // ── Validation ────────────────────────────────────────────────────────────
   function attachValidation() {
     const inputs = document.querySelectorAll('#inputBody input[type="number"]');
@@ -222,6 +258,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     buildRows();
+    attachUsernameValidation();
     attachValidation();
     attachDownloadButton();
     attachTabListener(); // chart is built lazily on first tab click
