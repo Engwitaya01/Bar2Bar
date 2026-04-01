@@ -106,6 +106,20 @@
   // ── Chart.js bar chart ────────────────────────────────────────────────────
   let chart = null;
 
+  function ensureChart() {
+    if (typeof Chart === "undefined") {
+      return;
+    }
+
+    if (!chart) {
+      buildChart();
+      return;
+    }
+
+    refreshChart();
+    chart.resize();
+  }
+
   function buildChart() {
     const ctx = document.getElementById("barChart").getContext("2d");
     const { income, expense } = readValues();
@@ -174,17 +188,42 @@
     chart.update();
   }
 
-  // ── Tab switching — refresh chart when Chart tab is shown ─────────────────
-  function attachTabListener() {
-    const chartTabBtn = document.getElementById("chart-tab");
-    chartTabBtn.addEventListener("shown.bs.tab", refreshChart);
+  function attachDownloadButton() {
+    const downloadButton = document.getElementById("downloadChart");
+
+    downloadButton.addEventListener("click", () => {
+      ensureChart();
+
+      if (!chart) {
+        return;
+      }
+
+      const link = document.createElement("a");
+      link.href = chart.toBase64Image("image/png", 1);
+      link.download = "bucks2bar-chart.png";
+      link.click();
+    });
   }
 
-  // ── Bootstrap ensures Chart.js script is loaded before DOMContentLoaded ───
+  // ── Tab switching — build chart first time, refresh on every visit ──────
+  function attachTabListener() {
+    const chartTabBtn = document.getElementById("chart-tab");
+    const renderChart = () => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(ensureChart);
+      });
+    };
+
+    chartTabBtn.addEventListener("shown.bs.tab", renderChart);
+    chartTabBtn.addEventListener("click", () => {
+      window.setTimeout(renderChart, 50);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     buildRows();
     attachValidation();
-    buildChart();
-    attachTabListener();
+    attachDownloadButton();
+    attachTabListener(); // chart is built lazily on first tab click
   });
 })();
